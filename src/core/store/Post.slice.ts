@@ -1,11 +1,22 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Post, PostService } from 'suusenju-sdk'
+import {
+  createAction,
+  createAsyncThunk,
+  createReducer,
+  isFulfilled,
+  isPending,
+  isRejected,
+} from "@reduxjs/toolkit";
+import { Post, PostService } from "danielbonifacio-sdk";
 
 interface PostSliceState {
   paginated?: Post.Paginated;
+  fetching: boolean;
+  counter: number;
 }
 
 const initialState: PostSliceState = {
+  fetching: false,
+  counter: 0,
   paginated: {
     page: 0,
     size: 0,
@@ -23,15 +34,23 @@ export const fetchPosts = createAsyncThunk(
   }
 );
 
-const postSlice = createSlice({
-  name: "post",
-  initialState,
-  reducers: {
-    addPost(state, action: PayloadAction<Post.Summary>) {
-      state.paginated?.content?.push(action.payload);
-    },
-  },
-});
+export const increment = createAction("post/increment");
 
-export const postReducer = postSlice.reducer;
-export const { addPost } = postSlice.actions;
+export const postReducer = createReducer(initialState, (builder) => {
+  builder
+    .addCase(increment, (state) => {
+      state.counter++;
+    })
+    .addCase(fetchPosts.fulfilled, (state, action) => {
+      state.paginated = action.payload;
+    })
+    .addMatcher(isPending, (state) => {
+      state.fetching = true;
+    })
+    .addMatcher(isFulfilled, (state) => {
+      state.fetching = false;
+    })
+    .addMatcher(isRejected, (state) => {
+      state.fetching = false;
+    });
+});
