@@ -13,6 +13,7 @@ export default function useEditors() {
 
   const fetchAllEditors = useCallback(
     async function () {
+      //@ts-expect-error
       dispatch(EditorActions.fetchAllEditors());
     },
     [dispatch]

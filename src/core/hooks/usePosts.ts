@@ -13,6 +13,7 @@ export default function usePosts() {
 
   const fetchPosts = useCallback(
     async function (query: Post.Query) {
+      //@ts-expect-error
       dispatch(PostActions.fetchPosts(query));
     },
     [dispatch]
